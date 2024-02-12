@@ -77,30 +77,20 @@ public class Main {
         prodColumnMap.remove("LAST_LINE");
 
         localColumnMap.forEach((localColumn, localColumnValue)-> {
-            String prodColumnValue = prodColumnMap.get(localColumn);
+            localColumnValue = formatValue(localColumnValue);
+            String prodColumnValue = formatValue(prodColumnMap.get(localColumn));
+
             if (!localColumnValue.equals(prodColumnValue)) {
                 sb.append(tableName);
                 sb.append(",");
-                sb.append(formatValue(localColumnValue));
+                sb.append(localColumnValue);
                 sb.append(",");
-                if (prodColumnValue != null) {
-                    sb.append(formatValue(prodColumnValue));
-                }
+                sb.append(prodColumnValue);
                 sb.append("\n");
             }
         });
 
         localColumnMap.keySet().removeIf(s -> prodColumnMap.keySet().remove(s));
-
-        if (!localColumnMap.isEmpty()) {
-            localColumnMap.forEach((key, value) -> {
-                sb.append(tableName);
-                sb.append(",");
-                sb.append(formatValue(value));
-                sb.append(",");
-                sb.append("\n");
-            });
-        }
 
         if (!prodColumnMap.isEmpty()) {
             prodColumnMap.forEach((key, value) -> {
@@ -116,6 +106,10 @@ public class Main {
     }
 
     private static String formatValue(String value) {
+        if (value == null) {
+            return "";
+        }
+
         if (value.charAt(value.length() - 1) == ',') {
             value = value.substring(0, value.length() - 1);
         }
@@ -150,7 +144,7 @@ public class Main {
             if (line.contains(")") && line.contains(";")) {
                 columnMap.put("LAST_LINE", line);
             } else if (line.trim().startsWith("KEY") || line.trim().startsWith("UNIQUE KEY")) {
-                columnMap.put("ZZZZ=" + getName(line), line); // to put key at last line uder table name
+                columnMap.put("ZZZZ=" + getName(line).replace("idx_",""), line);
             } else {
                 columnMap.put(getName(line), line);
             }
